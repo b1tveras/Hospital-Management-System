@@ -60,7 +60,6 @@ const Doctors = () => {
     }
   };
   const filteredDoctors = doctors.filter(d => 
-  const filteredDoctors = doctors.filter(d => 
     d.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     d.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -176,7 +175,6 @@ const Doctors = () => {
               </div>
             </div>
           </div>
-        ))}
         ))}
         {!isLoading && filteredDoctors.length === 0 && (
           <div className="col-span-full py-12 text-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-sm border border-white/50 dark:border-slate-700/50">
