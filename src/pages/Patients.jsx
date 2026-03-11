@@ -1,37 +1,69 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
 import Modal from '../components/Modal';
 import AddPatientForm from '../components/forms/AddPatientForm';
+import api from '../services/api';
+
 const Patients = () => {
   const { user } = useAuth();
   const isAdminOrDoctor = user?.role === 'Admin' || user?.role === 'Doctor';
 
   
-  const [patients, setPatients] = useState([
-    { id: 'PT-1001', name: 'Rajesh Kumar', age: 45, gender: 'Male', contact: '+91 98765 43210', lastVisit: '2023-10-15', status: 'Active' },
-{ id: 'PT-1002', name: 'Priya Sharma', age: 32, gender: 'Female', contact: '+91 87654 32109', lastVisit: '2023-10-18', status: 'Active' },
-{ id: 'PT-1003', name: 'Amit Patel', age: 58, gender: 'Male', contact: '+91 76543 21098', lastVisit: '2023-09-22', status: 'Inactive' },
-{ id: 'PT-1004', name: 'Sneha Verma', age: 28, gender: 'Female', contact: '+91 65432 10987', lastVisit: '2023-10-20', status: 'Active' },
-{ id: 'PT-1005', name: 'Suresh Yadav', age: 64, gender: 'Male', contact: '+91 54321 09876', lastVisit: '2023-08-11', status: 'Discharged' },
-  ]);
-
+  const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleAddPatient = (patientData) => {
-    const newPatient = {
-      ...patientData,
-      id: `PT-${1000 + patients.length + 1}`,
-      lastVisit: new Date().toISOString().split('T')[0],
-      status: 'Active'
-    };
-    setPatients(prev => [newPatient, ...prev]);
-    setIsModalOpen(false);
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/patients');
+      setPatients(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch patients:", err);
+      setError("Failed to load patient directory. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const handleAddPatient = async (patientData) => {
+    try {
+      setIsSaving(true);
+      
+      // Map AddPatientForm data (contact to phone) to match PatientDTO
+      const payload = {
+        name: patientData.name,
+        age: parseInt(patientData.age),
+        gender: patientData.gender,
+        phone: patientData.contact,
+        isActive: true
+      };
+
+      await api.post('/patients', payload);
+      setIsModalOpen(false);
+      
+      // Refetch the list to get the accurate ID from backend
+      await fetchPatients();
+    } catch (err) {
+      console.error("Failed to add patient:", err);
+      alert("Failed to save patient. Please check your connection and try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
   const filteredPatients = patients.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.id.toLowerCase().includes(searchTerm.toLowerCase())
+    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.patientCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -52,6 +84,14 @@ const Patients = () => {
           </button>
         )}
       </div>
+
+      </div>
+      
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm border border-red-200 dark:border-red-800/50">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-xl shadow-blue-900/5 dark:shadow-none border border-white/50 dark:border-slate-700/50 overflow-hidden transition-all duration-300 hover:shadow-2xl">
         {/* Toolbar */}
@@ -93,18 +133,27 @@ const Patients = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/50 dark:divide-slate-700/50">
-              {filteredPatients.map((patient) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      Loading patients...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredPatients.map((patient) => (
                 <tr key={patient.id} className="hover:bg-white/80 dark:hover:bg-slate-700/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-100 to-cyan-50 flex items-center justify-center shadow-sm border border-white">
                         <span className="text-blue-600 font-medium text-sm">
-                          {patient.name.split(' ').map(n => n[0]).join('')}
+                          {patient.name?.split(' ').map(n => n[0]).join('') || '?'}
                         </span>
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{patient.name}</div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400">{patient.id}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400">{patient.patientCode || `PT-${patient.id}`}</div>
                       </div>
                     </div>
                   </td>
@@ -113,18 +162,18 @@ const Patients = () => {
                     <div className="text-sm text-slate-500 dark:text-slate-400">{patient.gender}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                    {patient.contact}
+                    {patient.phone || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                    {patient.lastVisit}
+                    {/* patient.lastVisit doesn't exist on DTO currently, mock it or leave blank */}
+                    -
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${patient.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 
-                        patient.status === 'Inactive' ? 'bg-amber-100 text-amber-800' : 
+                      ${patient.isActive ? 'bg-emerald-100 text-emerald-800' : 
                         'bg-slate-100 text-slate-800'}`}
                     >
-                      {patient.status}
+                      {patient.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -144,7 +193,7 @@ const Patients = () => {
                   </td>
                 </tr>
               ))}
-              {filteredPatients.length === 0 && (
+              {!isLoading && filteredPatients.length === 0 && (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
                     No patients found matching your search.
@@ -180,7 +229,7 @@ const Patients = () => {
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Patient">
-        <AddPatientForm onSubmit={handleAddPatient} onCancel={() => setIsModalOpen(false)} />
+        <AddPatientForm onSubmit={handleAddPatient} onCancel={() => setIsModalOpen(false)} isLoading={isSaving} />
       </Modal>
     </div>
   );
