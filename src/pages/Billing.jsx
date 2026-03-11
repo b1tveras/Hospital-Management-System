@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, FileText, Download, Eye, IndianRupee } from 'lucide-react';
-
+import Modal from '../components/Modal';
+import GenerateInvoiceForm from '../components/forms/GenerateInvoiceForm';
 const Billing = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'Admin';
@@ -29,7 +30,17 @@ const Billing = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleGenerateInvoice = (invoiceData) => {
+    const newInvoice = {
+      ...invoiceData,
+      date: new Date().toISOString().split('T')[0],
+      id: `INV-2023-0${18 + invoices.length}`,
+    };
+    setInvoices(prev => [newInvoice, ...prev]);
+    setIsModalOpen(false);
+  };
   const filteredInvoices = invoices.filter(inv => {
     if (user?.role === 'Patient') {
        return inv.patient === 'John Doe'; // Mock patient filter
@@ -47,7 +58,10 @@ const Billing = () => {
         </div>
         
         {isAdmin && (
-          <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
             <Plus className="h-4 w-4" />
             Generate Invoice
           </button>
@@ -179,6 +193,9 @@ const Billing = () => {
           </table>
         </div>
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Generate Invoice">
+        <GenerateInvoiceForm onSubmit={handleGenerateInvoice} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
     </div>
   );
 };

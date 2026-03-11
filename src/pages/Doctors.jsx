@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, MoreVertical, Edit2, Trash2, Mail, Phone } from 'lucide-react';
-
+import Modal from '../components/Modal';
+import AddDoctorForm from '../components/forms/AddDoctorForm';
 const Doctors = () => {
   const { user } = useAuth();
   
@@ -22,7 +23,17 @@ const Doctors = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleAddDoctor = (doctorData) => {
+    const newDoctor = {
+      ...doctorData,
+      id: `DR-${100 + doctors.length + 1}`,
+      status: 'Available'
+    };
+    setDoctors(prev => [newDoctor, ...prev]);
+    setIsModalOpen(false);
+  };
   const filteredDoctors = doctors.filter(d => 
     d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     d.specialization.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,7 +48,10 @@ const Doctors = () => {
         </div>
         
         {user?.role === 'Admin' && (
-          <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
             <Plus className="h-4 w-4" />
             Add New Doctor
           </button>
@@ -128,6 +142,9 @@ const Doctors = () => {
           </div>
         )}
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Doctor">
+        <AddDoctorForm onSubmit={handleAddDoctor} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
     </div>
   );
 };

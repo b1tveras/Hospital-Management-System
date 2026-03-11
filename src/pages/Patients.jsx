@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, MoreVertical, Edit2, Trash2 } from 'lucide-react';
-
+import Modal from '../components/Modal';
+import AddPatientForm from '../components/forms/AddPatientForm';
 const Patients = () => {
   const { user } = useAuth();
   const isAdminOrDoctor = user?.role === 'Admin' || user?.role === 'Doctor';
@@ -16,7 +17,18 @@ const Patients = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleAddPatient = (patientData) => {
+    const newPatient = {
+      ...patientData,
+      id: `PT-${1000 + patients.length + 1}`,
+      lastVisit: new Date().toISOString().split('T')[0],
+      status: 'Active'
+    };
+    setPatients(prev => [newPatient, ...prev]);
+    setIsModalOpen(false);
+  };
   const filteredPatients = patients.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -31,7 +43,10 @@ const Patients = () => {
         </div>
         
         {isAdminOrDoctor && (
-          <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
             <Plus className="h-4 w-4" />
             Add New Patient
           </button>
@@ -164,6 +179,9 @@ const Patients = () => {
           </div>
         </div>
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Patient">
+        <AddPatientForm onSubmit={handleAddPatient} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
     </div>
   );
 };

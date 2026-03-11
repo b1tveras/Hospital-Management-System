@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Calendar, Clock, Video,  Filter, CheckCircle, XCircle } from 'lucide-react';
-
+import Modal from '../components/Modal';
+import AddAppointmentForm from '../components/forms/AddAppointmentForm';
 const Appointments = () => {
   const { user } = useAuth();
   const isPatient = user?.role === 'Patient';
@@ -20,7 +21,26 @@ const Appointments = () => {
 ]);
 
   const [dateFilter, setDateFilter] = useState('upcoming');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleAddAppointment = (appointmentData) => {
+    // Determine AM/PM formatted time
+    const [hours, minutes] = appointmentData.time.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const formattedHour = h % 12 || 12;
+    const formattedTime = `${formattedHour}:${minutes} ${ampm}`;
+
+    const newAppointment = {
+      ...appointmentData,
+      time: formattedTime,
+      dept: appointmentData.department,
+      id: `APT-0${10 + appointments.length}`,
+      status: 'Pending'
+    };
+    setAppointments(prev => [newAppointment, ...prev]);
+    setIsModalOpen(false);
+  };
   const filteredAppointments = appointments.filter(a => {
     if (isPatient) {
        return a.patient === 'John Doe'; // Mock patient filter
@@ -39,7 +59,10 @@ const Appointments = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Manage and view upcoming consultations.</p>
         </div>
         
-        <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-fit">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-fit"
+        >
           <Plus className="h-4 w-4" />
           {isPatient ? 'Book Appointment' : 'New Appointment'}
         </button>
@@ -146,6 +169,9 @@ const Appointments = () => {
           )}
         </div>
       </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Appointment">
+        <AddAppointmentForm onSubmit={handleAddAppointment} onCancel={() => setIsModalOpen(false)} />
+      </Modal>
     </div>
   );
 };
