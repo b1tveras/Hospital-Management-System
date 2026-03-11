@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const AddDoctorForm = ({ onSubmit, onCancel }) => {
+const AddDoctorForm = ({ onSubmit, onCancel, isLoading }) => {
   const [formData, setFormData] = useState({
     name: '',
     specialization: 'General Physician',
@@ -108,9 +108,10 @@ const AddDoctorForm = ({ onSubmit, onCancel }) => {
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          disabled={isLoading}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Save Doctor
+          {isLoading ? 'Saving...' : 'Save Doctor'}
         </button>
       </div>
     </form>

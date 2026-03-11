@@ -1,42 +1,68 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, MoreVertical, Edit2, Trash2, Mail, Phone } from 'lucide-react';
+import { useEffect } from 'react';
 import Modal from '../components/Modal';
 import AddDoctorForm from '../components/forms/AddDoctorForm';
+import api from '../services/api';
+
 const Doctors = () => {
   const { user } = useAuth();
   
   // Mock Data
-  const [doctors, setDoctors] = useState([
-   { id: 'DR-101', name: 'Dr. Priya Sharma', specialization: 'Cardiologist', email: 'priya.s@lifecare.com', phone: '+91 98765 43210', status: 'Available' },
-{ id: 'DR-102', name: 'Dr. Rajesh Kumar', specialization: 'Neurologist', email: 'rajesh.k@lifecare.com', phone: '+91 87654 32109', status: 'In Surgery' },
-{ id: 'DR-103', name: 'Dr. Anita Patel', specialization: 'Pediatrician', email: 'anita.p@lifecare.com', phone: '+91 76543 21098', status: 'On Leave' },
-{ id: 'DR-104', name: 'Dr. Suresh Verma', specialization: 'Orthopedics', email: 'suresh.v@lifecare.com', phone: '+91 65432 10987', status: 'Available' },
-{ id: 'DR-105', name: 'Dr. Amit Singh', specialization: 'Dermatologist', email: 'amit.s@lifecare.com', phone: '+91 99887 76655', status: 'Available' },
-{ id: 'DR-106', name: 'Dr. Kavita Rao', specialization: 'Gynecologist', email: 'kavita.r@lifecare.com', phone: '+91 88776 65544', status: 'In Surgery' },
-{ id: 'DR-107', name: 'Dr. Vikram Mehta', specialization: 'ENT Specialist', email: 'vikram.m@lifecare.com', phone: '+91 77665 54433', status: 'Available' },
-{ id: 'DR-108', name: 'Dr. Neha Gupta', specialization: 'Psychiatrist', email: 'neha.g@lifecare.com', phone: '+91 66554 43322', status: 'On Leave' },
-{ id: 'DR-109', name: 'Dr. Arjun Nair', specialization: 'General Physician', email: 'arjun.n@lifecare.com', phone: '+91 55443 32211', status: 'Available' },
-{ id: 'DR-110', name: 'Dr. Sunita Joshi', specialization: 'Ophthalmologist', email: 'sunita.j@lifecare.com', phone: '+91 44332 21100', status: 'Available' },
-{ id: 'DR-111', name: 'Dr. Rahul Mishra', specialization: 'Urologist', email: 'rahul.m@lifecare.com', phone: '+91 33221 10099', status: 'In Surgery' },
-{ id: 'DR-112', name: 'Dr. Pooja Iyer', specialization: 'Endocrinologist', email: 'pooja.i@lifecare.com', phone: '+91 22110 09988', status: 'Available' },
-  ]);
-
+  const [doctors, setDoctors] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleAddDoctor = (doctorData) => {
-    const newDoctor = {
-      ...doctorData,
-      id: `DR-${100 + doctors.length + 1}`,
-      status: 'Available'
-    };
-    setDoctors(prev => [newDoctor, ...prev]);
-    setIsModalOpen(false);
+  const fetchDoctors = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get('/doctors');
+      setDoctors(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch doctors:", err);
+      setError("Failed to load doctor directory. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const handleAddDoctor = async (doctorData) => {
+    try {
+      setIsSaving(true);
+      
+      const payload = {
+        name: `Dr. ${doctorData.name}`,
+        specialization: doctorData.specialization,
+        email: doctorData.email,
+        phone: doctorData.phone,
+        status: 'AVAILABLE'
+      };
+
+      await api.post('/doctors', payload);
+      setIsModalOpen(false);
+      
+      // Refetch the list to get the accurate ID from backend
+      await fetchDoctors();
+    } catch (err) {
+      console.error("Failed to add doctor:", err);
+      alert("Failed to save doctor. Please check your connection and try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
   const filteredDoctors = doctors.filter(d => 
-    d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    d.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDoctors = doctors.filter(d => 
+    d.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    d.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -84,18 +110,33 @@ const Doctors = () => {
         </div>
       </div>
 
+      </div>
+      
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm border border-red-200 dark:border-red-800/50">
+          {error}
+        </div>
+      )}
+
       {/* Grid View */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredDoctors.map((doctor) => (
+        {isLoading ? (
+          <div className="col-span-full py-12 text-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-sm border border-white/50 dark:border-slate-700/50">
+            <div className="flex items-center justify-center gap-2 text-slate-500">
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              Loading doctors...
+            </div>
+          </div>
+        ) : filteredDoctors.map((doctor) => (
           <div key={doctor.id} className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-lg shadow-blue-900/5 dark:shadow-none border border-white/50 dark:border-slate-700/50 p-6 flex flex-col hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group">
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-full bg-gradient-to-br from-blue-100 to-cyan-50 flex items-center justify-center text-blue-600 font-bold text-xl shadow-sm border border-white dark:border-slate-700 transform group-hover:scale-110 transition-transform duration-300">
-                  {doctor.name.split(' ').slice(1).map(n => n[0]).join('')}
+                  {doctor.name?.split(' ').slice(1).map(n => n[0]).join('') || '?'}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{doctor.name}</h3>
-                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">{doctor.specialization}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">{doctor.specialization || 'General'}</p>
                 </div>
               </div>
               <div className="relative">
@@ -136,14 +177,15 @@ const Doctors = () => {
             </div>
           </div>
         ))}
-        {filteredDoctors.length === 0 && (
+        ))}
+        {!isLoading && filteredDoctors.length === 0 && (
           <div className="col-span-full py-12 text-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-sm border border-white/50 dark:border-slate-700/50">
             <p className="text-slate-500 dark:text-slate-400">No doctors found matching your search.</p>
           </div>
         )}
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Doctor">
-        <AddDoctorForm onSubmit={handleAddDoctor} onCancel={() => setIsModalOpen(false)} />
+        <AddDoctorForm onSubmit={handleAddDoctor} onCancel={() => setIsModalOpen(false)} isLoading={isSaving} />
       </Modal>
     </div>
   );
