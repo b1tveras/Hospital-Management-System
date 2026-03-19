@@ -31,7 +31,7 @@ public class PatientController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'DOCTOR')")
     public ResponseEntity<PatientDTO> addPatient(@RequestBody PatientDTO patientDTO, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         patientDTO.setHospitalId(userDetails.getHospitalId()); // Set correct hospital ID
         PatientDTO newPatient = patientService.addPatient(patientDTO);

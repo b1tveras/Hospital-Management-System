@@ -41,7 +41,7 @@ public class PatientService {
         patient.setHospital(hospital);
         
         // Auto generate simple patient code
-        patient.setPatientCode("PT-" + System.currentTimeMillis() % 10000);
+        patient.setPatientCode("PT-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         patient.setIsActive(true);
 
         Patient savedPatient = patientRepository.save(patient);
