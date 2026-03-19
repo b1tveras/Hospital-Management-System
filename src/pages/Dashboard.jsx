@@ -34,7 +34,7 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 transition-colors">Welcome back, {user?.name}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Here's what's happening today.</p>
         </div>
-        
+
         {isPatient && (
           <button className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
             Book Appointment
@@ -58,7 +58,7 @@ const Dashboard = () => {
               </div>
               <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10 text-white transform group-hover:scale-110 transition-transform duration-300`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${stat.color} shadow-lg shadow-${stat.color.replace('bg-', '')}/30`}>
-                   <Icon className="h-4 w-4 text-white" />
+                  <Icon className="h-4 w-4 text-white" />
                 </div>
               </div>
             </div>
@@ -78,11 +78,10 @@ const Dashboard = () => {
               {recentActivity.map((activity) => (
                 <li key={activity.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                   <div className="flex items-start gap-4">
-                    <div className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ${
-                      activity.type === 'alert' ? 'bg-red-500' : 
-                      activity.type === 'registration' ? 'bg-emerald-500' : 
-                      'bg-blue-500'
-                    }`} />
+                    <div className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ${activity.type === 'alert' ? 'bg-red-500' :
+                        activity.type === 'registration' ? 'bg-emerald-500' :
+                          'bg-blue-500'
+                      }`} />
                     <div className="flex-1">
                       <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">{activity.text}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
@@ -102,49 +101,49 @@ const Dashboard = () => {
 
         {/* Quick Actions / Info */}
         <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-xl shadow-blue-900/5 dark:shadow-none border border-white/50 dark:border-slate-700/50 p-6 transition-all duration-300 hover:shadow-2xl">
-           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Links</h2>
-           <div className="space-y-3">
-             {isAdmin && (
-               <>
-                 <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
-                   <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 group-hover:scale-110 transition-all">
-                     <UserPlus className="h-4 w-4" />
-                   </div>
-                   Register New Patient
-                 </button>
-                 <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
-                   <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:scale-110 transition-all">
-                     <Calendar className="h-4 w-4" />
-                   </div>
-                   Manage Schedules
-                 </button>
-               </>
-             )}
-             {(isAdmin || isDoctor) && (
-               <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
-                 <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 group-hover:scale-110 transition-all">
-                   <Users className="h-4 w-4" />
-                 </div>
-                 View Patient Directory
-               </button>
-             )}
-             {isPatient && (
-               <>
-                 <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
-                   <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 group-hover:scale-110 transition-all">
-                     <Calendar className="h-4 w-4" />
-                   </div>
-                   Schedule Follow-up
-                 </button>
-                 <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
-                   <div className="p-2 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 group-hover:scale-110 transition-all">
-                     <FileText className="h-4 w-4" />
-                   </div>
-                   Download Medical Records
-                 </button>
-               </>
-             )}
-           </div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Links</h2>
+          <div className="space-y-3">
+            {isAdmin && (
+              <>
+                <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 group-hover:scale-110 transition-all">
+                    <UserPlus className="h-4 w-4" />
+                  </div>
+                  Register New Patient
+                </button>
+                <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
+                  <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 group-hover:scale-110 transition-all">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  Manage Schedules
+                </button>
+              </>
+            )}
+            {(isAdmin || isDoctor) && (
+              <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
+                <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 group-hover:scale-110 transition-all">
+                  <Users className="h-4 w-4" />
+                </div>
+                View Patient Directory
+              </button>
+            )}
+            {isPatient && (
+              <>
+                <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 group-hover:scale-110 transition-all">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  Schedule Follow-up
+                </button>
+                <button className="w-full text-left px-4 py-3.5 rounded-xl bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm shadow-sm hover:shadow-md text-sm font-medium text-slate-700 dark:text-slate-200 transition-all duration-300 flex items-center gap-3 border border-white/50 dark:border-slate-600 group">
+                  <div className="p-2 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 group-hover:scale-110 transition-all">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  Download Medical Records
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
