@@ -6,7 +6,8 @@ import {
   Calendar, 
   FileText, 
   Activity, 
-  Stethoscope 
+  Stethoscope,
+  FileSearch
 } from 'lucide-react';
 import { Logo } from './Logo';
 
@@ -25,6 +26,7 @@ const Sidebar = () => {
         { path: '/doctors', label: 'Doctors', icon: Stethoscope },
         { path: '/appointments', label: 'Appointments', icon: Calendar },
         { path: '/billing', label: 'Billing', icon: FileText },
+        { path: '/report-summarizer', label: 'Report AI', icon: FileSearch },
       ];
     }
     
@@ -34,6 +36,7 @@ const Sidebar = () => {
         { path: '/dashboard', label: 'Dashboard', icon: Activity },
         { path: '/patients', label: 'My Patients', icon: Users },
         { path: '/appointments', label: 'My Schedule', icon: Calendar },
+        { path: '/report-summarizer', label: 'Report AI', icon: FileSearch },
       ];
     }
 
@@ -43,6 +46,7 @@ const Sidebar = () => {
         { path: '/dashboard', label: 'Dashboard', icon: Activity },
         { path: '/appointments', label: 'My Appointments', icon: Calendar },
         { path: '/billing', label: 'My Bills', icon: FileText },
+        { path: '/report-summarizer', label: 'Report AI', icon: FileSearch },
       ];
     }
 

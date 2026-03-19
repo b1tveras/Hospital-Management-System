@@ -11,7 +11,7 @@ import Patients from './pages/Patients';
 import Doctors from './pages/Doctors';
 import Appointments from './pages/Appointments';
 import Billing from './pages/Billing';
-
+import ReportSummarizer from './pages/ReportSummarizer';
 function App() {
   return (
     <AuthProvider>
@@ -35,6 +35,7 @@ function App() {
               
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="appointments" element={<Appointments />} />
+              <Route path="report-summarizer" element={<ReportSummarizer />} />
               
               {/* Admin and Doctor only */}
               <Route 
