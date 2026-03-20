@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Medical Report Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #0a2e1a 100%);
+      color: white;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
+        linear-gradient(90deg, rgba(34, 197, 94, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(34, 197, 94, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transform: perspective(200px) rotateX(8deg) rotateY(-8deg);
+      box-shadow: 0 8px 16px rgba(34, 197, 94, 0.2);
+    }
+
+    .title-section h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: #a7f3d0;
+      font-size: 14px;
+    }
+
+    .live-badge {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-badge::before {
+      content: '●';
+      color: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      height: 2px;
+      background: rgba(34, 197, 94, 0.2);
+      z-index: 0;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.1);
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .step.active .step-circle {
+      background: #22c55e;
+      border-color: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .step-label {
+      font-size: 10px;
+      color: #a7f3d0;
+      opacity: 0.7;
+    }
+
+    .upload-zone {
+      border: 2px dashed rgba(34, 197, 94, 0.35);
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      background: rgba(34, 197, 94, 0.03);
+      transform: perspective(800px) rotateX(2deg);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .upload-zone:hover {
+      border-color: rgba(34, 197, 94, 0.6);
+      background: rgba(34, 197, 94, 0.06);
+      transform: perspective(800px) rotateX(2deg) translateY(-4px);
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+    }
+
+    .upload-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .upload-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .upload-subtitle {
+      color: #a7f3d0;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .upload-badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(34, 197, 94, 0.1);
+      color: #a7f3d0;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-preview {
+      display: none;
+      background: rgba(34, 197, 94, 0.05);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-icon {
+      font-size: 24px;
+    }
+
+    .file-details h4 {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .file-details p {
+      font-size: 12px;
+      color: #a7f3d0;
+    }
+
+    .remove-btn {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .remove-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .language-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .lang-btn {
+      background: rgba(34, 197, 94, 0.05);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #a7f3d0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transform: perspective(300px) rotateX(4deg);
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn:hover {
+      transform: perspective(300px) rotateX(0deg);
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      border-color: #22c55e;
+      color: white;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .cta-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #16a34a, #166534);
+      border: none;
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transform: perspective(400px) rotateX(4deg);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    .cta-btn:hover {
+      transform: perspective(400px) rotateX(0deg) translateY(-2px);
+      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .cta-btn:active {
+      transform: perspective(400px) rotateX(0deg) translateY(0px);
+    }
+
+    @keyframes shimmer {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    .cta-btn.loading {
+      pointer-events: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .message.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #a7f3d0;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .language-buttons {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .title-section h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <div class="icon">🧠</div>
+        <div class="title-section">
+          <h1>AI Report Analyzer</h1>
+          <p class="subtitle">Medical reports ka instant AI analysis</p>
+        </div>
+      </div>
+      <div class="live-badge">LIVE</div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="step active" data-step="1">
+        <div class="step-circle">1</div>
+        <span class="step-label">Upload</span>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-circle">2</div>
+        <span class="step-label">Language</span>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Analyze</span>
+      </div>
+      <div class="step" data-step="4">
+        <div class="step-circle">4</div>
+        <span class="step-label">Result</span>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Report drop karein ya click karein</div>
+      <div class="upload-subtitle">Supported formats: PDF, JPG, PNG (Max 10MB)</div>
+      <div class="upload-badges">
+        <span class="badge">PDF</span>
+        <span class="badge">JPG</span>
+        <span class="badge">PNG</span>
+        <span class="badge">Max 10MB</span>
+      </div>
+      <input type="file" class="file-input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+
+    <div class="file-preview" id="filePreview">
+      <div class="file-info">
+        <div class="file-icon">📄</div>
+        <div class="file-details">
+          <h4 id="fileName">sample-report.pdf</h4>
+          <p id="fileSize">2.3 MB</p>
+        </div>
+      </div>
+      <div class="remove-btn" id="removeBtn">✕</div>
+    </div>
+
+    <div class="language-buttons">
+      <button class="lang-btn" data-lang="hi">हिंदी</button>
+      <button class="lang-btn" data-lang="en">English</button>
+      <button class="lang-btn" data-lang="pa">ਪੰਜਾਬੀ</button>
+      <button class="lang-btn" data-lang="ur">اردو</button>
+    </div>
+
+    <button class="cta-btn" id="ctaBtn">
+      <span id="ctaText">Analyze Report</span>
+    </button>
+
+    <div class="message error" id="errorMessage">
+      ⚠️ Report analyze nahi ho saki. Dobara try karein.
+    </div>
+
+    <div class="message success" id="successMessage">
+      ✅ Report successfully analyzed!
+    </div>
+  </div>
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeBtn = document.getElementById('removeBtn');
+    const langBtns = document.querySelectorAll('.lang-btn');
+    const ctaBtn = document.getElementById('ctaBtn');
+    const ctaText = document.getElementById('ctaText');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const steps = document.querySelectorAll('.step');
+
+    let selectedFile = null;
+    let selectedLang = null;
+
+    // Upload zone click
+    uploadZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleFileSelect(file);
+      }
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.style.borderColor = 'rgba(34, 197, 94, 0.6)';
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.style.borderColor = 'rgba(34, 197, 94, 0.35)';
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.style.borderColor = 'rgba(34, 197, 94, 0.35)';
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        handleFileSelect(file);
+      }
+    });
+
+    function handleFileSelect(file) {
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      uploadZone.style.display = 'none';
+      filePreview.style.display = 'flex';
+      updateSteps();
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Remove file
+    removeBtn.addEventListener('click', () => {
+      selectedFile = null;
+      fileInput.value = '';
+      filePreview.style.display = 'none';
+      uploadZone.style.display = 'block';
+      updateSteps();
+    });
+
+    // Language selection
+    langBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        langBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedLang = btn.dataset.lang;
+        updateSteps();
+      });
+    });
+
+    // CTA button click
+    ctaBtn.addEventListener('click', () => {
+      if (!selectedFile) {
+        showError();
+        return;
+      }
+
+      ctaBtn.classList.add('loading');
+      ctaText.innerHTML = '<div class="spinner"></div>Analyzing...';
+
+      setTimeout(() => {
+        ctaBtn.classList.remove('loading');
+        ctaText.textContent = 'Analyze Report';
+        showSuccess();
+        updateSteps();
+      }, 2200);
+    });
+
+    function updateSteps() {
+      // Step 1: Always active
+      steps[0].classList.add('active');
+
+      // Step 2: Active if file selected
+      if (selectedFile) {
+        steps[1].classList.add('active');
+      } else {
+        steps[1].classList.remove('active');
+        steps[2].classList.remove('active');
+        steps[3].classList.remove('active');
+      }
+
+      // Step 3: Active if language selected
+      if (selectedFile && selectedLang) {
+        steps[2].classList.add('active');
+      } else {
+        steps[2].classList.remove('active');
+        steps[3].classList.remove('active');
+      }
+
+      // Step 4: Active after analysis
+      // This would be set after successful analysis
+    }
+
+    function showError() {
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 3000);
+    }
+
+    function showSuccess() {
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      steps[3].classList.add('active');
+      setTimeout(() => {
+        successMessage.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>
