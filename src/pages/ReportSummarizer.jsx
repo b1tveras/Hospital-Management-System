@@ -537,33 +537,3 @@ export default function ReportSummarizer() {
     </div>
   );
 }
-                      ? "⬇ Low"
-                      : "✅ Normal"}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Advice */}
-          <div className="bg-white border rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
-              👨⚕️ Doctor Ki Salah
-            </p>
-            <ul className="space-y-2">
-              {result.advice?.map((tip, i) => (
-                <li key={i} className="text-sm text-gray-700">
-                  • {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p className="text-xs text-yellow-700 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-            ⚠️ Ye AI summary sirf samajhne ke liye hai. Ilaaj ke liye doctor se
-            milein.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
